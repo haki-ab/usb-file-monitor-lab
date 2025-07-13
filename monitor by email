@@ -1,1 +1,59 @@
 
+
+# 📧 Lab 02 – Test d’envoi d’e-mail SMTP avec PowerShell
+
+## 🎯 Objectif
+
+Ce laboratoire vise à tester la fonctionnalité d’envoi d’e-mails via un script PowerShell utilisant le protocole SMTP de Gmail.
+
+---
+
+## 🧰 Technologies utilisées
+
+- PowerShell
+- Cmdlet `Send-MailMessage`
+- SMTP Gmail (smtp.gmail.com)
+- Mot de passe d’application
+
+---
+
+## 📜 Script utilisé
+
+```powershell
+$smtpServer = "smtp.gmail.com"
+$smtpPort = 587
+$senderEmail = "mettre_ici_votre_email@gmail.com"
+$receiverEmail = "mettre_ici_email_de_destination@gmail.com"
+$appPassword = "mettre_ici_le_mot_de_passe_application"
+
+$subject = "Test de notification"
+$body = "Ce message est un test d'envoi depuis PowerShell."
+
+Send-MailMessage -From $senderEmail -To $receiverEmail -Subject $subject -Body $body -SmtpServer $smtpServer -Port $smtpPort -UseSsl -Credential (New-Object System.Management.Automation.PSCredential($senderEmail, (ConvertTo-SecureString $appPassword -AsPlainText -Force)))
+```
+
+---
+
+## 🛠️ Étapes
+
+1. Générez un mot de passe d’application depuis votre compte Gmail.
+2. Remplacez les valeurs des variables dans le script.
+3. Exécutez le script dans PowerShell pour tester l’envoi.
+
+---
+
+## ✅ Résultat attendu
+
+- Vous recevez un e-mail de test dans la boîte de réception du destinataire.
+
+---
+
+## 📌 Remarques
+
+- Ce test est utile pour vérifier que les identifiants Gmail sont bien configurés.
+- Il est fortement déconseillé de stocker les mots de passe en clair dans les scripts.
+
+---
+
+**Auteur :** Hakim Abeoub  
+**Date :** Juillet 2025
