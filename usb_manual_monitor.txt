@@ -1,0 +1,51 @@
+# ===============================================
+# 🔐 Script de surveillance USB avec alerte email
+# Objectif : Détecter les nouveaux fichiers copiés sur la clé USB
+# et envoyer une alerte par email + journaliser localement
+# ===============================================
+
+# 📁 Chemin du disque USB à surveiller
+$usbPath = "E:\"
+
+# 📄 Fichier de journal local (logs)
+$logFile = "C:\logs\usb_activity_email.log"
+
+# ✉️ Paramètres de l'email (à adapter selon vos besoins)
+$smtpServer = "smtp.gmail.com"
+$smtpPort = 587
+$senderEmail = "mettre_email_ici@gmail.com"       # 👉 Remplacer par votre adresse Gmail
+$receiverEmail = "mettre_email_ici@gmail.com"     # 👉 Remplacer par l'adresse du destinataire
+$appPassword = "mettre_mot_de_passe_app_ici"      # 👉 Généré depuis votre compte Gmail (Mot de passe d'application)
+
+# 📌 Lire les fichiers existants (au lancement)
+$existingFiles = Get-ChildItem -Path $usbPath -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+
+Write-Host "🟢 Surveillance en cours sur la clé USB ($usbPath)..."
+
+while ($true) {
+    Start-Sleep -Seconds 5
+
+    # Lire les fichiers actuels
+    $currentFiles = Get-ChildItem -Path $usbPath -Recurse -ErrorAction SilentlyContinue | Select-Object -ExpandProperty FullName
+
+    # Identifier les nouveaux fichiers
+    $newFiles = $currentFiles | Where-Object { $_ -notin $existingFiles }
+
+    foreach ($file in $newFiles) {
+        $timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
+        $message = "$timestamp - Nouveau fichier détecté sur la clé USB : $file"
+
+        # 📝 Écriture dans le fichier log
+        Add-Content -Path $logFile -Value $message
+
+        # ✉️ Envoi de l'email
+        $securePassword = ConvertTo-SecureString $appPassword -AsPlainText -Force
+        $cred = New-Object System.Management.Automation.PSCredential($senderEmail, $securePassword)
+
+        Send-MailMessage -From $senderEmail -To $receiverEmail -Subject "🔔 Alerte Fichier USB" -Body $message -SmtpServer $smtpServer -Port $smtpPort -UseSsl -Credential $cred
+    }
+
+    # 🔁 Mettre à jour la liste des fichiers
+    $existingFiles = $currentFiles
+}
+
